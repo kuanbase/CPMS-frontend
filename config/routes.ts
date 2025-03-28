@@ -53,10 +53,10 @@ export default [
   //   path: '/list',
   //   component: './TableList',
   // },
-  // {
-  //   path: '/',
-  //   redirect: '/welcome',
-  // },
+  {
+    path: '/',
+    redirect: '/welcome',
+  },
   {
     path: '*',
     layout: false,

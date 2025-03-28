@@ -1,18 +1,16 @@
-import { EllipsisOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import {ActionType, ModalForm, PageContainer, ProColumns, ProFormSelect, ProFormText} from '@ant-design/pro-components';
 import { ProTable, TableDropdown } from '@ant-design/pro-components';
-import {Button, Dropdown, message, Tag} from 'antd';
-import React, {useEffect, useRef, useState} from 'react';
+import {Button, message, Tag} from 'antd';
+import React, {useRef, useState} from 'react';
 import {
   createUser,
-  getRoleList,
   getRoleListAll,
   getUserList,
   removeUser,
   updateUser
 } from '@/services/ant-design-pro/api';
 import {ProForm} from "@ant-design/pro-form/lib";
-import {ModalContext} from "antd/es/modal/context";
 
 export default () => {
 
@@ -22,7 +20,7 @@ export default () => {
   const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 
   const [RegisterModalVisible, setRegisterModalVisible] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserDtosItem>(null);
+  const [currentUser, setCurrentUser] = useState<API.UserDtosItem>(null);
   const actionRef = useRef<ActionType>();
 
   // 新增用戶
@@ -131,9 +129,7 @@ export default () => {
       //   'Dealer': { text: 'DEALER', status: 'Default' }
       // },
       render: (_, record) => (
-        <Tag color={record.role === 'ADMINISTRATOR' ? 'green' : 'blue'}>
-          {record.role}
-        </Tag>
+        <Tag color={record.role === 'ADMINISTRATOR' ? 'green' : 'blue'}>{record.role}</Tag>
       ),
     },
     {
@@ -142,35 +138,64 @@ export default () => {
       valueType: 'date',
     },
     {
+      title: '最後登錄日期',
+      dataIndex: 'lastLoginDate',
+      valueType: 'date',
+    },
+    {
+      title: '狀態',
+      dataIndex: 'isLogin',
+      render: (isLogin) => (
+        <Tag color={isLogin ? 'green' : 'red'}>
+          {isLogin ? '在線' : '離線'}
+        </Tag>
+      ),
+    },
+    {
       title: '操作',
       valueType: 'option',
       key: 'option',
-      render: (text, record, _, action) => [
-        <a key="edit" onClick={() => {
-          setCurrentUser((prev) => {
-            console.log('Previous user:', prev);
-            console.log('New user:', record);
-            return record;
-          });
+      render: (text, record, _, action) => {
+        return [
+          <a
+            key="edit"
+            onClick={() => {
+              setCurrentUser((prev) => {
+                console.log('Previous user:', prev);
+                console.log('New user:', record);
+                return record;
+              });
 
-          setRender(prev => prev + 1);  // 強制重新渲染
+              setRender((prev) => prev + 1); // 強制重新渲染
 
-          setEditModalVisible(true);
-        }}>编辑</a>,
-        <TableDropdown
-          key="actionGroup"
-          menus={[
-            { key: 'delete', name: '删除', onClick: () => {
-              setCurrentUser(record);
-              setDeleteModalVisible(true);
-            }},
-            { key: 'details', name: '详情', onClick: () => {
-              setCurrentUser(record);
-              setDetailsModalVisible(true);
-            } },
-          ]}
-        />,
-      ],
+              setEditModalVisible(true);
+            }}
+          >
+            编辑
+          </a>,
+          <TableDropdown
+            key="actionGroup"
+            menus={[
+              {
+                key: 'delete',
+                name: '删除',
+                onClick: () => {
+                  setCurrentUser(record);
+                  setDeleteModalVisible(true);
+                },
+              },
+              {
+                key: 'details',
+                name: '详情',
+                onClick: () => {
+                  setCurrentUser(record);
+                  setDetailsModalVisible(true);
+                },
+              },
+            ]}
+          />,
+        ];
+      },
     },
   ];
 
@@ -395,6 +420,7 @@ export default () => {
         open={deleteModalVisible}
         onOpenChange={setDeleteModalVisible}
         initialValues={currentUser}
+        onFinish={handleDelete}
         // 编辑逻辑
       >
         <ProForm.Group>

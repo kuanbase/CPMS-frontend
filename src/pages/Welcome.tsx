@@ -1,145 +1,141 @@
-import { PageContainer } from '@ant-design/pro-components';
-import { useModel } from '@umijs/max';
-import { Card, theme } from 'antd';
-import React from 'react';
+import React, { useState } from 'react';
+import { PageContainer } from '@ant-design/pro-layout';
+import {
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Timeline,
+  Button,
+  Space
+} from 'antd';
+import {
+  UserOutlined,
+  TeamOutlined,
+  LockOutlined,
+  FileProtectOutlined,
+  AlertOutlined,
+  SecurityScanOutlined
+} from '@ant-design/icons';
+import {
+  GetLogs,
+  GetLogsAll,
+  GetOnlineUserList,
+  getRoleAmount,
+  getRoleList,
+  getUserAmount,
+  getUserList
+} from "@/services/ant-design-pro/api";
+import {ModalForm} from "@ant-design/pro-components";
+import {forEach} from "lodash";
 
-/**
- * 每个单独的卡片，为了复用样式抽成了组件
- * @param param0
- * @returns
- */
-const InfoCard: React.FC<{
-  title: string;
-  index: number;
-  desc: string;
-  href: string;
-}> = ({ title, href, index, desc }) => {
-  const { useToken } = theme;
+const totalUsers = (await getUserAmount()).data;
+const roles = (await getRoleAmount()).data;
+const activeUsers = (await GetOnlineUserList()).data.length;
+const logs = (await GetLogs());
 
-  const { token } = useToken();
+if (logs.success) {
+  console.log("LOGS: " + logs.data.logs);
+} else {
+  console.log("LOGS: 請求失敗");
+}
 
-  return (
-    <div
-      style={{
-        backgroundColor: token.colorBgContainer,
-        boxShadow: token.boxShadow,
-        borderRadius: '8px',
-        fontSize: '14px',
-        color: token.colorTextSecondary,
-        lineHeight: '22px',
-        padding: '16px 19px',
-        minWidth: '220px',
-        flex: 1,
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          gap: '4px',
-          alignItems: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 48,
-            height: 48,
-            lineHeight: '22px',
-            backgroundSize: '100%',
-            textAlign: 'center',
-            padding: '8px 16px 16px 12px',
-            color: '#FFF',
-            fontWeight: 'bold',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/zos/bmw-prod/daaf8d50-8e6d-4251-905d-676a24ddfa12.svg')",
-          }}
-        >
-          {index}
-        </div>
-        <div
-          style={{
-            fontSize: '16px',
-            color: token.colorText,
-            paddingBottom: 8,
-          }}
-        >
-          {title}
-        </div>
-      </div>
-      <div
-        style={{
-          fontSize: '14px',
-          color: token.colorTextSecondary,
-          textAlign: 'justify',
-          lineHeight: '22px',
-          marginBottom: 8,
-        }}
-      >
-        {desc}
-      </div>
-      <a href={href} target="_blank" rel="noreferrer">
-        了解更多 {'>'}
-      </a>
-    </div>
-  );
-};
+const Dashboard: React.FC = () => {
+  // 統計數據
+  const [statistics, setStatistics] = useState({
+    totalUsers: totalUsers,
+    activeUsers: activeUsers,
+    roles: roles,
+  });
 
-const Welcome: React.FC = () => {
-  const { token } = theme.useToken();
-  const { initialState } = useModel('@@initialState');
+  const systemLogs = [];
+
+  for (let i = 0; i < logs.data.logs.length; i++) {
+    systemLogs.push(
+    {
+          color: 'green',
+          children: logs.data.logs[i],
+    });
+  }
+
+  // 系統操作日誌
+  // const systemLogs = [
+  //   {
+  //     color: 'green',
+  //     children: '管理員 admin 修改了角色權限',
+  //     time: '2023-06-15 10:30:00'
+  //   },
+  //   {
+  //     color: 'blue',
+  //     children: '新增用戶 user01',
+  //     time: '2023-06-14 14:20:00'
+  //   },
+  //   {
+  //     color: 'red',
+  //     children: '檢測到可疑登錄行為',
+  //     time: '2023-06-13 09:45:00'
+  //   }
+  // ];
+
   return (
     <PageContainer>
-      <Card
-        style={{
-          borderRadius: 8,
-        }}
-        bodyStyle={{
-          backgroundImage:
-            initialState?.settings?.navTheme === 'realDark'
-              ? 'background-image: linear-gradient(75deg, #1A1B1F 0%, #191C1F 100%)'
-              : 'background-image: linear-gradient(75deg, #FBFDFF 0%, #F5F7FF 100%)',
-        }}
-      >
-        <div
-          style={{
-            backgroundPosition: '100% -30%',
-            backgroundRepeat: 'no-repeat',
-            backgroundSize: '274px auto',
-            backgroundImage:
-              "url('https://gw.alipayobjects.com/mdn/rms_a9745b/afts/img/A*BuFmQqsB2iAAAAAAAAAAAAAAARQnAQ')",
-          }}
-        >
-          <div
-            style={{
-              fontSize: '20px',
-              color: token.colorTextHeading,
-            }}
+      {/* 統計卡片 */}
+      <Row gutter={16}>
+        <Col span={8}>
+          <Card>
+            <Statistic
+              title="總用戶數"
+              value={statistics.totalUsers}
+              prefix={<UserOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Statistic
+              title="在線用戶"
+              value={statistics.activeUsers}
+              prefix={<TeamOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={8}>
+          <Card>
+            <Statistic
+              title="角色數量"
+              value={statistics.roles}
+              prefix={<LockOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/*<ModalForm open={}>*/}
+
+      {/*</ModalForm>*/}
+
+      {/* 快速操作和系統日誌 */}
+      <Row gutter={16} style={{ marginTop: 24 }}>
+        {/* 系統操作日誌現在佔據更大的空間 */}
+        <Col span={24}>
+          <Card
+            title="系統日誌"
+            extra={<SecurityScanOutlined />}
+            style={{ height: '400px', overflowY: 'auto' }}
           >
-            Casino 權限管理系統
-          </div>
-          <p
-            style={{
-              fontSize: '14px',
-              color: token.colorTextSecondary,
-              lineHeight: '22px',
-              marginTop: 16,
-              marginBottom: 32,
-              width: '65%',
-            }}
-          >
-            Casino 權限管理系統，是基於RBAC權限模型。
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              gap: 16,
-            }}
-          >
-          </div>
-        </div>
-      </Card>
+            <Timeline>
+              {systemLogs.map((log, index) => (
+                <Timeline.Item key={index} color={log.color}>
+                  {log.children}
+                  <p>{log.time}</p>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </Card>
+        </Col>
+      </Row>
     </PageContainer>
   );
 };
 
-export default Welcome;
+export default Dashboard;

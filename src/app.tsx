@@ -45,7 +45,7 @@ export async function getInitialState(): Promise<{
           userid: response.data.number,
           access: response.data.role,
           // 添加头像，如果后端没有提供，可以使用默认头像
-          // avatar: response.data.avatar || 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+          avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
         } as API.CurrentUser;
       }
 
@@ -66,30 +66,50 @@ export async function getInitialState(): Promise<{
         fetchUserInfo,
         currentUser,
         settings: defaultSettings as Partial<LayoutSettings>,
+        loading: false,
       };
     } catch (error) {
       return {
         fetchUserInfo,
+        loading: false,
         settings: defaultSettings as Partial<LayoutSettings>,
       };
     }
   }
 
+  // const currentUser = await fetchUserInfo();
+
   return {
     fetchUserInfo,
+    currentUser,
     settings: defaultSettings as Partial<LayoutSettings>,
+    loading: false,
   };
 }
 
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
+
+  if (!initialState || !initialState.currentUser)
+  {
+    console.log("InitialState is null");
+  }
+
   return {
+    loading: false,
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
     avatarProps: {
-      // src: initialState?.currentUser?.avatar || 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+      src: initialState?.currentUser?.avatar || 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
       title: initialState?.currentUser?.name ||'User',
       render: (_, avatarChildren) => {
-        console.log('Avatar Children:', avatarChildren); // 添加这行
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
+        console.log('Avatar Children:', avatarChildren);
+
+        if (avatarChildren) {
+          console.log("OK")
+          console.log(currentUser)
+          return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
+        }
+
+        return <AvatarDropdown>User</AvatarDropdown>
       },
     },
     waterMarkProps: {

@@ -49,6 +49,8 @@ declare namespace API {
     email: string;
     password: string;  // 如果 DTO 中包含
     createdDate: string;
+    isLogin: boolean;
+    lastLoginDate: string;
     role: string;  // 与后端 DTO 的 Role 字段对应
   };
 

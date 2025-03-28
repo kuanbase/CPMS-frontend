@@ -9,14 +9,12 @@ export async function currentUser(options?: { [key: string]: any }) {
   return await request<{
     success: boolean;
     data: UserDto;
-    ssc: UserDto;
-    fuck: UserDto;
   }>(url + '/User/GetUserByOwner', {
     method: 'GET',
     ...(options || {}),
   });
 }
-// 获取用户列表
+// 獲取用户列表
 export async function getUserList(params: {
   page: number;
   pageSize: number;
@@ -31,6 +29,46 @@ export async function getUserList(params: {
   }>(url + '/User/GetListByCurrentIndex', {
     method: 'GET',
     params,
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+export async function GetOnlineUserList() {
+  return await request<{
+    success: boolean;
+    data: any[];
+  }>(url + '/User/GetOnlineUserList', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+// 獲取用戶數量
+export async function getUserAmount() {
+  return await request<{
+    success: boolean;
+    data: number;
+  }>(url + '/User/GetUserAmount', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'Content-Type': 'application/json'
+    }
+  });
+}
+
+export async function getRoleAmount() {
+  return await request<{
+    success: boolean;
+    data: number;
+  }>(url + '/Role/GetRoleAmount', {
+    method: 'GET',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
       'Content-Type': 'application/json'
@@ -91,7 +129,7 @@ export async function outLogin(options?: { [key: string]: any }) {
 
 /** 登录接口 POST /api/login/account */
 export async function login(body: API.LoginParams, options?: { [key: string]: any }) {
-  return request<API.LoginResult>(url + '/Auth/GetToken', {
+  return request<API.LoginResult>(url + '/Auth/GetAdminToken', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -167,63 +205,31 @@ export async function removeRole(body: API.RoleItem, options?: { [key: string]: 
   })
 }
 
-/** 此处后端没有提供注释 GET /api/notices */
-export async function getNotices(options?: { [key: string]: any }) {
-  return request<API.NoticeIconList>('/api/notices', {
+export async function GetLogsAll() {
+  return await request<{
+    success: boolean;
+    data: any[];
+  }>(url + '/logs/GetLogsAll', {
     method: 'GET',
-    ...(options || {}),
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'Content-Type': 'application/json'
+    }
   });
 }
 
-/** 获取规则列表 GET /api/rule */
-export async function rule(
-  params: {
-    // query
-    /** 当前的页码 */
-    current?: number;
-    /** 页面的容量 */
-    pageSize?: number;
-  },
-  options?: { [key: string]: any },
-) {
-  return request<API.RuleList>('/api/rule', {
+export async function GetLogs() {
+  return await request<{
+    success: boolean;
+    data: string[];
+  }>(url + '/logs/recent', {
     method: 'GET',
-    params: {
-      ...params,
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+      'Content-Type': 'application/json'
     },
-    ...(options || {}),
   });
 }
 
-/** 更新规则 PUT /api/rule */
-export async function updateRule(options?: { [key: string]: any }) {
-  return request<API.RuleListItem>('/api/rule', {
-    method: 'POST',
-    data:{
-      method: 'update',
-      ...(options || {}),
-    }
-  });
-}
 
-/** 新建规则 POST /api/rule */
-export async function addRule(options?: { [key: string]: any }) {
-  return request<API.RuleListItem>('/api/rule', {
-    method: 'POST',
-    data:{
-      method: 'post',
-      ...(options || {}),
-    }
-  });
-}
 
-/** 删除规则 DELETE /api/rule */
-export async function removeRule(options?: { [key: string]: any }) {
-  return request<Record<string, any>>('/api/rule', {
-    method: 'POST',
-    data:{
-      method: 'delete',
-      ...(options || {}),
-    }
-  });
-}

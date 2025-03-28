@@ -1,5 +1,5 @@
 import { Footer } from '@/components';
-import { login } from '@/services/ant-design-pro/api';
+import {currentUser, login} from '@/services/ant-design-pro/api';
 import {
   LockOutlined,
   UserOutlined,
@@ -119,10 +119,29 @@ const Login: React.FC = () => {
         // 存储 token
         localStorage.setItem('access_token', response.token);
 
-        message.success('登录成功！');
+        const userInfo = await currentUser({
+          headers: { 'Authorization': response.token }
+        });
 
-        // 跳转到首页或仪表盘
-        history.push('/welcome'); // 或 '/dashboard'
+        if (userInfo.success) {
+          await setInitialState((s) => ({
+            ...s,
+            currentUser: {
+              name: userInfo.data.name,
+              avatar: userInfo.data.avatar,
+              // 其他用户信息
+            }
+          }));
+
+          message.success('登录成功！');
+          history.push('/welcome');
+          return;
+        }
+
+        // message.success('登录成功！');
+        //
+        // // 跳转到首页或仪表盘
+        // history.push('/welcome'); // 或 '/dashboard'
 
         return;
       }
@@ -160,7 +179,7 @@ const Login: React.FC = () => {
             maxWidth: '75vw',
           }}
           logo={<img alt="logo" src="/logo.svg" />}
-          title="哈哈娛樂場權限管理系統"
+          title="帳號及權限管理系統"
           subTitle={<h3>Winson-group</h3>}
           initialValues={{
             autoLogin: true,
